@@ -18,7 +18,7 @@ a possible use of this code would be to detect advertisements in videos or image
 and be able to count the time spent on screen of the same, or it can be used for a 
 facial recognition system .
 
-Thanks for Sapienza Università di Roma for ball.mp4 video os SPQR Robot Soccer team to ilustrate
+Thanks for Sapienza Università di Roma for robot_soccer.mp4 video os SPQR Robot Soccer team to ilustrate
 classifier user.
  
  
