@@ -58,6 +58,6 @@ index.html is a basic html than allows
 4) take a webcam image and test the recognizer.
 
 The model trained is valid for video recog too.
-
+Thanks to Alex Gasco Perez for his contribution
 (c) Nacho Ariza - 12/2018
 
