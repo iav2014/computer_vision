@@ -1,0 +1,263 @@
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+body, html {margin: 0;padding: 0;}
+body{
+  /* background-color: #f1f1f1; */
+  background-color: #dcdee3;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  width: 100%;
+  height: 100%;
+
+}
+.table{
+  width:100%;
+  height:100%;
+  display:table;
+}
+.tableCell{
+  display:table-cell;
+  vertical-align: middle;
+  text-align:center;
+}
+.button {
+  -webkit-transition: all .1s ease-in-out;
+  transition: all .1s ease-in-out;
+  background-color: #106ebe;
+  border: 1px solid transparent;
+  border-radius: 0;
+  color: #fff!important;
+  display: block;
+  fill: #fff;
+  font-size: 24px;
+  font-weight: 300;
+  padding: 5px 20px 8px;
+  text-align: center;
+  text-decoration: none;
+  margin-left: 18px;
+  width: 145px;
+  height: 2em;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+header{
+  width: 100%;
+  color: white;
+  /* background: #027bc6; */
+  background: #0e5897;
+  height: 60px;
+  font-size: 15px;
+  padding: 8px;
+  padding-left: 55px;
+}
+header > div{
+  width: 100px;
+  font-size: 2em;
+  font-weight: bold;
+  float: left;
+}
+.selected, header > button:hover{
+  color: #106ebe !important;
+  background-color: white;
+}
+.selected:hover{
+  background-color: #106ebe;
+  color: white !important;
+}
+header > .button{
+  float: right;
+  transform: scale(0.8);
+  margin-left: -5px;
+}
+#menu{
+  width: 200px;
+  height: 90vh;
+  background-color: white;
+  float: left;
+  padding:10px;
+  text-align: center;
+  padding-top: 30px;
+}
+
+#menu > label {
+  margin-top: 10px;
+}
+#menu > input {
+  font-size: 1.5em;
+  text-align: center;
+  margin-top: 20px;
+  margin-left:18px;
+  margin-bottom: 20px;
+  width: 145px;
+  height: 2em;
+}
+#menu > input.empty {
+  border-color: red;
+}
+
+
+
+#playwebcam{
+  background-color: #89c402;
+  color: #1a1a1f!important;
+}
+.unabled{
+  background-color: rgb(184, 179, 179) !important;
+  color: #1a1a1f!important;
+  cursor: not-allowed;
+}
+
+#myOnlineCamera{
+  float:left;
+}
+#display{
+  display:none;
+  position: absolute;
+  margin-top: 20px;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 640px;
+}
+#myOnlineCamera video {
+  width: 640px;
+  height: 480px;
+}
+
+#mark{
+  border-radius: 100%;
+  border: 10px solid rgba(250,250,250,0.2);
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  top: 10%;
+  width: 275px;
+  height: 400px;
+}
+#prompt{
+  color: rgba(255,255,255,0.3);
+  font-size: 3em;
+}
+#flash{
+  display:none;
+  width:100%;
+  height:100%;
+  position:absolute;
+}
+#samples{
+  position: absolute;
+  top: 0px;
+  right: -270px;
+  width: 220px;
+}
+#samples > img {
+  width: 100px;
+  height: auto;
+  margin:5px;
+}
+#myOnlineCamera canvas {
+  width: 320px;
+  height: 240px;
+  margin: 15px;
+  float: left;
+  display: none;
+}
+
+#myOnlineCamera canvas {
+  border: 1px solid black;
+}
+
+#myOnlineCamera button {
+  clear: both;
+  margin: 30px;
+}
+.tab1{
+  display: block;
+}
+.tab2{
+  display: none;
+}
+.recognitionCam{
+  width: 320px !important;
+  margin-top: 10px !important;
+}
+.recognitionCam video{
+  width: 320px !important;
+  height: 240px !important;
+}
+#outputCont{
+  width: 320px !important;
+  height: 240px !important;
+  top: 330px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  /* background-color: gray; */
+}
+
+#output{
+  width:100%;
+  height:auto;
+  display:none;
+}
+
+#detectedname{
+  width: 320px;
+  top: 580px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+/* SPINNER */
+.lds-ring {
+  margin-left: 55px;
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 51px;
+  height: 51px;
+  margin: 6px;
+  border: 6px solid #106ebe;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #106ebe transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+#spinner{
+  display:none;
+}
+.logs{
+  display: none;
+}

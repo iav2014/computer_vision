@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+	<title>Webcam photo demo</title>
+	<meta charset='utf-8'>
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<script
+		src="https://code.jquery.com/jquery-3.3.1.min.js"
+		integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+		crossorigin="anonymous"></script>
+	<script src="main.js"></script>	
+</head>
+<body>
+	<header class="centered-text">
+		<!-- <h1>SKMO faceID recognizer verification example using dlib DNN!</h1> -->
+		<div id="logo">SKMO</div>
+		<button class='button' id="recognizeTab">Recognize</button>
+		<button class='button selected' id="trainTab">Train</button>
+
+	</header>
+	<div id="menu">
+			
+			<label for="name" class="tab1">Employee ID:</label>
+			<input type="text" class="tab1" id="namefield">
+			
+			<button class='button unabled tab1' id="playwebcam"><i class="fa fa-camera" style="font-size:0.8em;"></i> Play</button>
+
+			<button class='button tab1' id="normalize">
+				Normalize
+			</button>
+			
+			<button class='button tab1' id="train">
+				Train
+			</button>
+
+			<button class='button tab2' id="prediceBest">Predice</button>
+			<div class="tab1">
+				<div id="normalized" class="logs">Normalized...</div>
+				<div id="trained" class="logs">Trained...</div>
+			</div>
+
+			<div id="spinner" class="lds-ring"><div></div><div></div><div></div><div></div></div>
+
+	</div>
+	<div id="myOnlineCamera">
+	  <div id="display">
+			<div id="flash"></div>
+			<div id="mark" class="tab1">
+				<div class="table">
+						<div id="prompt" class="tableCell">
+								ON YOUR MARKS
+								<!-- MOVE YOUR HEAD SLIGHTLY -->
+						</div>
+				</div>
+			</div>
+			<video id="webcamvideo"></video>
+			<div id="samples"></div>
+		</div>
+		<canvas id="facephoto"
+						ondragenter="event.stopPropagation(); event.preventDefault();"
+						ondragover="event.stopPropagation(); event.preventDefault();"
+						ondrop="event.stopPropagation(); event.preventDefault(); dodrop(event);">
+		</canvas>
+		<div id = "outputCont" class="tab2" >
+			<img id="output" src="" />
+		</div>
+		
+	</div>
+	<div id="detectedname" class="tab2">
+	</div>
+</body>
+</html>
