@@ -1,0 +1,261 @@
+<!doctype html>
+<html>
+<head>
+	<title>FaceID demo</title>
+	<meta charset='utf-8'>
+	<script
+		src="https://code.jquery.com/jquery-3.3.1.min.js"
+		crossorigin="anonymous"></script>
+</head>
+<body>
+<header class="centered-text">
+	<h1>faceID recognizer verification example using dlib+opencv (DNN!)</h1>
+	<div id="myOnlineCamera">
+		<video id="webcamvideo"></video>
+		<canvas id="facephoto"
+						ondragenter="event.stopPropagation(); event.preventDefault();"
+						ondragover="event.stopPropagation(); event.preventDefault();"
+						ondrop="event.stopPropagation(); event.preventDefault(); dodrop(event);">
+		</canvas>
+		<button id="playwebcam">Play webcam video</button>
+		<br>
+		<button id="takephoto">Take photo & send</button>
+		<label for="name">employeeID:</label>
+		<input type="text" id="namefield">
+		<br>
+		<button id="prediceBest">prediceBest!</button>
+		<br>
+		<button id="normalize">normalize</button>
+
+		<button id="train">train</button>
+		<br>
+		<img id="output" src="" width="320" height="240"/>
+	</div>
+	<div>
+		<h1 id="detectedname"></h1>
+	</div>
+	<style>
+		#myOnlineCamera video {
+			width: 320px;
+			height: 240px;
+			margin: 30px;
+			float: left;
+		}
+
+		#myOnlineCamera video {
+			border: 1px solid black;
+		}
+
+		#myOnlineCamera canvas {
+			width: 320px;
+			height: 240px;
+			margin: 30px;
+			float: left;
+		}
+
+		#myOnlineCamera canvas {
+			border: 1px solid black;
+		}
+
+		#myOnlineCamera button {
+			clear: both;
+			margin:30px;
+		}
+	</style>
+
+	<script>
+		var maxDim = 320;
+
+		function getImageDisplayScale(img) {
+			var w = img.width;
+			var h = img.height;
+
+			var scale = 1.0;
+			if (w > h) {
+				scale = maxDim / w;
+			} else {
+				scale = maxDim / h;
+			}
+
+			if (scale < 1.0) {
+				w = w * scale;
+				h = h * scale;
+			}
+			return ({width: w, height: h});
+		}
+
+		function displayImage(imageId, imageData) {
+			var imgEl = document.getElementById(imageId);
+
+			// rescale displayed image if it is too large
+			var img = new Image();
+			img.onload = function (e) {
+				var img = e.target;
+				var scaledDims = getImageDisplayScale(img);
+				imgEl.src = imageData;
+				imgEl.width = scaledDims.width;
+				imgEl.height = scaledDims.height;
+			};
+			img.src = imageData;
+		}
+
+		function dodrop(event) {
+			var dt = event.dataTransfer;
+			var files = dt.files;
+			var count = files.length;
+
+			var reader = new FileReader();
+			reader.onload = function (e) {
+				var image = new Image();
+				image.onload = function () {
+					var video = document.getElementById('webcamvideo');
+					var canvas = document.getElementById('facephoto');
+					canvas.width = video.offsetWidth;
+					canvas.height = video.offsetHeight;
+
+					var tempcontext = canvas.getContext("2d"),
+						tempScale = (canvas.height / canvas.width);
+
+					tempcontext.drawImage(
+						image,
+						0, 0,
+						video.offsetWidth, video.offsetHeight
+					);
+
+					$.post("/prediceBest", {image: canvas.toDataURL('image/png')}, function (data) {
+						console.log("Post success: ", data);
+						document.getElementById('detectedname').innerHTML = "IT IS " + data.playerName.className;
+					});
+				};
+				image.src = reader.result;
+			}
+			reader.readAsDataURL(files[0]);
+		}
+
+		var videoObj = {"video": true},
+			errBack = function (error) {
+				alert("Video capture error: ", error.code);
+			};
+
+		// Ask the browser for permission to use the Webcam
+		if (navigator.getUserMedia) {                    // Standard
+			navigator.getUserMedia(videoObj, startWebcam, errBack);
+		} else if (navigator.webkitGetUserMedia) {        // WebKit
+			navigator.webkitGetUserMedia(videoObj, startWebcam, errBack);
+		} else if (navigator.mozGetUserMedia) {        // Firefox
+			navigator.mozGetUserMedia(videoObj, startWebcam, errBack);
+		}
+		;
+
+		function startWebcam(stream) {
+
+			var myOnlineCamera = document.getElementById('myOnlineCamera'),
+				video = document.getElementById('webcamvideo'),
+				canvas = document.getElementById('facephoto');
+
+			let playBtn = document.getElementById('playwebcam').addEventListener('click', () => {
+				video.width = video.offsetWidth;
+
+				if (navigator.getUserMedia) {                    // Standard
+					video.srcObject = stream;
+					video.play();
+				} else if (navigator.webkitGetUserMedia) {        // WebKit
+					video.srcObject = window.webkitURL.createObjectURL(stream);
+					video.play();
+				} else if (navigator.mozGetUserMedia) {        // Firefox
+					video.srcObject = window.URL.createObjectURL(stream);
+					video.play();
+				}
+				;
+			})
+
+			// Click to take the photo
+			document.getElementById('takephoto').addEventListener('click', () => {
+				var canvas = document.getElementById('facephoto');
+
+				canvas.width = video.offsetWidth;
+				canvas.height = video.offsetHeight;
+
+				var tempcontext = canvas.getContext("2d"),
+					tempScale = (canvas.height / canvas.width);
+
+				tempcontext.drawImage(
+					video,
+					0, 0,
+					video.offsetWidth, video.offsetHeight
+				);
+
+				$.post("/image", {
+					image: canvas.toDataURL('image/png'),
+					name: document.getElementById('namefield').value
+				}, function (data) {
+					console.log("Post success: " + data);
+				});
+
+			})
+
+			// Click to take the photo
+			document.getElementById('prediceBest').addEventListener('click', () => {
+				var canvas = document.getElementById('facephoto');
+				document.getElementById('detectedname').innerHTML = null;
+
+				canvas.width = video.offsetWidth;
+				canvas.height = video.offsetHeight;
+
+				var tempcontext = canvas.getContext("2d"),
+					tempScale = (canvas.height / canvas.width);
+
+				tempcontext.drawImage(
+					video,
+					0, 0,
+					video.offsetWidth, video.offsetHeight
+				);
+
+				$.post("/prediceBest", {image: canvas.toDataURL('image/png')}, function (data) {
+					if (!data.status) {
+						document.getElementById('detectedname').innerHTML = "[No face recognize!]";
+					}
+					var str = '';
+					for (let i = 0; i < data.players.length; i++) {
+						if (i > 0) str += ',';
+						str = str + data.players[i].className;
+					}
+					;
+
+
+					let imgBase64 = data.imgBase64;
+					displayImage('output', 'data:image/jpeg;base64,' + imgBase64);
+					document.getElementById('detectedname').innerHTML = "[" + str + "]";
+
+
+				});
+
+			});
+
+			document.getElementById('normalize').addEventListener('click', () => {
+
+
+				$.get("/process", {}, function (data) {
+					alert("normalize success!");
+					console.log("Get success: " + data);
+				});
+
+			})
+
+			document.getElementById('train').addEventListener('click', () => {
+
+
+				$.get("/train", {}, function (data) {
+					alert("train success!");
+					console.log("Get success: " + data);
+				});
+
+			})
+
+
+		};
+
+	</script>
+
+</body>
+</html>
