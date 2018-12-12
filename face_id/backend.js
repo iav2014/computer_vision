@@ -35,6 +35,7 @@ MIT License
  */
 const cv = require('opencv4nodejs');
 const https = require('https');
+const http = require('http');
 const fr = require('face-recognition');
 const express = require('express');
 const cors = require('cors');
@@ -43,6 +44,7 @@ const bodyParser = require("body-parser");
 
 let FaceRecognitor = require('./FaceRecognition/FaceRecognitor');
 const https_port = 3000;
+const http_port = 8080;
 
 const app = express();
 // cert to access webcam from outsider,,,
@@ -129,4 +131,12 @@ https.createServer(https_options, app).listen(https_port).on('error', (err) => {
 	}
 }).on('listening', () => {
 	console.log(process.pid + ' - https listening on port:' + https_port);
+});
+http.createServer(app).listen(http_port).on('error', (err) => {
+	if (err) {
+		console.error(err);
+		process.exit(1);
+	}
+}).on('listening', () => {
+	console.log(process.pid + ' - http listening on port:' + http_port);
 });
