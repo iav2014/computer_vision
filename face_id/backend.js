@@ -57,7 +57,7 @@ let https_options = {
 
 let encodeJpgBase64 = (img) => {
 	return cv.imencode('.jpg', img).toString('base64');
-}
+};
 
 global.directory = __dirname + '/data/';
 global.modelFile = 'model/resnet_model.json';
