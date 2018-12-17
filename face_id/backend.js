@@ -41,6 +41,8 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const bodyParser = require("body-parser");
+const video = require('../streaming/video');
+const index = require('../streaming/routes/index');
 
 let FaceRecognitor = require('./FaceRecognition/FaceRecognitor');
 const https_port = 3000;
@@ -58,7 +60,12 @@ let https_options = {
 let encodeJpgBase64 = (img) => {
 	return cv.imencode('.jpg', img).toString('base64');
 };
-
+let RemoveLastDirectoryPartOf = (the_url) => {
+	let the_arr = the_url.split('/');
+	the_arr.pop();
+	return (the_arr.join('/'));
+};
+global.basename=RemoveLastDirectoryPartOf(__dirname);
 global.directory = __dirname + '/data/';
 global.modelFile = 'model/resnet_model.json';
 global.recognizer = fr.FaceRecognizer();
@@ -124,13 +131,25 @@ app.post('/prediceBest', function (req, res) {
 	}
 });
 
-https.createServer(https_options, app).listen(https_port).on('error', (err) => {
+//app.use('/', index);
+
+let https_server=https.createServer(https_options, app).listen(https_port).on('error', (err) => {
 	if (err) {
 		console.error(err);
 		process.exit(1);
 	}
 }).on('listening', () => {
 	console.log(process.pid + ' - https listening on port:' + https_port);
+	const io = require('socket.io')(https_server); // only under https_server
+	io.on('connection', (socket) => {
+		console.log('[incoming socket connection]' + socket.id);
+		socket.on('disconnect', () => {
+			console.log('[socket disconnected]');
+		});
+	});
+	video.start((err, imgB64) => {
+		io.emit('frame', {buffer: imgB64}); // broadcast to all incoming sockets
+	});
 });
 http.createServer(app).listen(http_port).on('error', (err) => {
 	if (err) {
@@ -139,4 +158,7 @@ http.createServer(app).listen(http_port).on('error', (err) => {
 	}
 }).on('listening', () => {
 	console.log(process.pid + ' - http listening on port:' + http_port);
+	
 });
+
+

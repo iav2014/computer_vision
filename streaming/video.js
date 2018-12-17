@@ -7,11 +7,13 @@ let camInterval = 1000 / camFps;
 let vCap = new cv.VideoCapture(0);
 let delay = 5;
 let fr = require('face-recognition').withCv(cv);
-let recognizer = fr.FaceRecognizer();
+//let recognizer = fr.FaceRecognizer();
+let recognizer = null;
 let model = null;
 const fs = require('fs');
 const minDetections = 10;
 const skmoTeam = ['155638', '157877', '165828'];
+/*
 try {
 	console.log('-> loading model:', new Date());
 	console.log(__dirname)
@@ -24,6 +26,7 @@ try {
 	console.error('no model file loaded!');
 	process.exit(1);
 }
+*/
 
 // BLUE/GREEN/RED
 const green = new cv.Vec(0, 255, 0);
@@ -115,6 +118,24 @@ let live = (frame) => {
 
 
 let start = (callback) => {
+	if (recognizer == null) {
+		recognizer=fr.FaceRecognizer();
+		try {
+			console.log('-> loading model:', new Date());
+			console.log(__dirname)
+			model = JSON.parse(fs.readFileSync('/Users/ariza/Documents/codigo/github/computer_vision/face_id/data/model/resnet_model.json'));
+			
+			recognizer.load(model);
+			console.log('--> end loader:', new Date());
+		} catch (error) {
+			console.error(error);
+			console.error('no model file loaded!');
+			process.exit(1);
+		}
+	} else {
+		recognizer = global.recognizer;
+	}
+	
 	setInterval(function () {
 		let frame = vCap.read();
 		// loop back to start on end of stream reached
@@ -125,8 +146,8 @@ let start = (callback) => {
 		} else {
 			;
 			let imgB64 = cv.imencode('.jpg', live(frame.resize(480 / 2, 800 / 2))).toString('base64');
-			callback(null,imgB64);
-		
+			callback(null, imgB64);
+			
 			const key = cv.waitKey(delay);
 		}
 		
@@ -136,5 +157,3 @@ let start = (callback) => {
 module.exports = {
 	start
 }
-
-
