@@ -1,0 +1,15 @@
+#sublogo{
+  margin-top: 16px;
+  font-size: 0.9em;
+}
+
+#stream{
+  position: absolute;
+  margin-top: 20px;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 640px;
+  height: 480px;
+}

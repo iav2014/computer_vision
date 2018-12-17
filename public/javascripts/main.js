@@ -243,6 +243,9 @@ $( document ).ready(function() {
 
 			})
 
+			$("#live").click(()=>{
+				window.location.href = "index_live.html"
+			})
 			document.getElementById('train').addEventListener('click', () => {
 				$("#spinner").show();
 
