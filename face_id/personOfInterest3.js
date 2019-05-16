@@ -62,10 +62,11 @@ function draw(frame, faceRect, text, face_region_color, team) {
 
 
 const devicePort = 0;
-const vCap = new cv.VideoCapture(devicePort);
-//const vCap = new cv.VideoCapture('/Users/ariza/Downloads/aarea4.mov');
+//const vCap = new cv.VideoCapture(devicePort);
+console.log(__dirname);
+const vCap = new cv.VideoCapture(__dirname+'/video/'+'skype_33.mov');
 
-const delay = 5;
+const delay = 1;
 let done = false;
 const classifier = new cv.CascadeClassifier(cv.HAAR_FRONTALFACE_ALT2);
 
@@ -120,7 +121,7 @@ let live = (frame) => {
 	return frame;
 };
 
-
+/*
 while (!done) {
 	let frame = vCap.read();
 	// loop back to start on end of stream reached
@@ -130,14 +131,66 @@ while (!done) {
 		console.log('empty');
 	} else {
 		//console.log(frame);frame=frame.resize(480/2,800/2);
-		cv.imshow('frame', live(frame.resize(480 / 2, 800 / 2)));
+		cv.imshow('frame', live(frame.resize(480/2,800/2)));
 		const key = cv.waitKey(delay);
 	}
 	// ...
 	//const key = cv.waitKey(delay);
 	//done = key !== 255;
-}
-;
+};
+*/
+let recursive = (value) => {
+	let frame = vCap.read();
+	// loop back to start on end of stream reached
+	if (frame.empty) {
+		vCap.reset();
+		frame = vCap.read();
+		console.log('empty');
+	} else {
+		//console.log(frame);frame=frame.resize(480/2,800/2);
+		cv.imshow('frame', live(frame.resize(480/2,800/2)));
+		const key = cv.waitKey(delay);
+	}
+	
+	setTimeout(recursive, 1);
+};
+recursive(1);
+/*
+setInterval(function () {
+	let frame = vCap.read();
+	// loop back to start on end of stream reached
+	if (frame.empty) {
+		vCap.reset();
+		frame = vCap.read();
+		console.log('empty');
+	} else {
+		//console.log(frame);frame=frame.resize(480/2,800/2);
+		cv.imshow('frame', live(frame.resize(480/2,800/2)));
+		const key = cv.waitKey(delay);
+	}
+	// ...
+	//const key = cv.waitKey(delay);
+	//done = key !== 255;
+	
+	
+}, 5);
 
 
+const delay = 1;
+let recursive = (value) => {
+	let frame = camera.read();
+	// loop back to start on end of stream reached
+	if (frame.empty) {
+		camera.reset();
+		frame = camera.read();
+		console.log('empty');
+	} else {
+		cv.imshow('knowlerPoint', detect(frame.resize(480 / 2, 640 / 2)));
+		const key = cv.waitKey(delay);
+	}
+	
+	setTimeout(recursive, 1);
+};
+recursive(1);
 
+*/

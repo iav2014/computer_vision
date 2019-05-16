@@ -46,14 +46,14 @@ let draw = (frame, faceRect, text, face_region_color, team) => {
 	);
 	let textArray = [];
 	if (team) {
-		textArray = [{text: 'Expert team', fontSize: 0.5, thickness: 1, color: green},
+		textArray = [{text: 'Knowler team', fontSize: 0.5, thickness: 1, color: green},
 			{text: '[' + text + ']', fontSize: 0.4, thickness: 1, color: face_region_color}];
 	} else {
 		textArray = [{text: '[' + text + ']', fontSize: 0.4, thickness: 1, color: yellow}];
 	}
 	cv.drawTextBox(
 		frame,
-		new cv.Point(rect.x, rect.y + rect.height + 10),
+		new cv.Point(rect.x - 10, rect.y + rect.height + 10),
 		textArray,
 		alpha
 	);
@@ -116,14 +116,18 @@ let live = (frame) => {
 	return frame;
 };
 
-
+let RemoveLastDirectoryPartOf = (the_url) => {
+	let the_arr = the_url.split('/');
+	the_arr.pop();
+	return (the_arr.join('/'));
+}
 let start = (callback) => {
 	if (recognizer == null) {
-		recognizer=fr.FaceRecognizer();
+		recognizer = fr.FaceRecognizer();
 		try {
 			console.log('-> loading model:', new Date());
 			console.log(__dirname)
-			model = JSON.parse(fs.readFileSync('/Users/ariza/Documents/codigo/github/computer_vision/face_id/data/model/resnet_model.json'));
+			model = JSON.parse(fs.readFileSync(RemoveLastDirectoryPartOf(__dirname)+'/face_id/data/model/resnet_model.json'));
 			
 			recognizer.load(model);
 			console.log('--> end loader:', new Date());

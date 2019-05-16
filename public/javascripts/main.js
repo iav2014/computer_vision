@@ -215,7 +215,7 @@ $( document ).ready(function() {
 					0, 0,
 					video.offsetWidth, video.offsetHeight
 				);
-
+				
 				$.post("/prediceBest", {image: canvas.toDataURL('image/png')}, function (data) {
 					var str = '';
 					for (let i = 0; i < data.players.length; i++) {

@@ -65,7 +65,7 @@ let RemoveLastDirectoryPartOf = (the_url) => {
 	the_arr.pop();
 	return (the_arr.join('/'));
 };
-global.basename=RemoveLastDirectoryPartOf(__dirname);
+global.basename = RemoveLastDirectoryPartOf(__dirname);
 global.directory = __dirname + '/data/';
 global.modelFile = 'model/resnet_model.json';
 global.recognizer = fr.FaceRecognizer();
@@ -118,6 +118,7 @@ app.get('/train', function (req, res) {
 app.post('/prediceBest', function (req, res) {
 	console.log('[prediceBest post was called]')
 	let image = req.body.image.split(',')[1];
+	let bot = req.body.bot;
 	let bitmap = new Buffer.from(image, 'base64');
 	let [img, players] = FaceRecognitor.prediceBest(bitmap);
 	console.log(img, players);
@@ -127,19 +128,26 @@ app.post('/prediceBest', function (req, res) {
 	} else {
 		const imgBase64 = encodeJpgBase64(img);
 		console.log('prediceBest:', players);
-		res.json({status: true, imgBase64: imgBase64, players: players});
+		if (bot) {
+			res.json({status:true,img:img,players});
+		} else {
+			res.json({status: true, imgBase64: imgBase64, players: players});
+		}
+		
 	}
 });
 
+
 //app.use('/', index);
 
-let https_server=https.createServer(https_options, app).listen(https_port).on('error', (err) => {
+let https_server = https.createServer(https_options, app).listen(https_port).on('error', (err) => {
 	if (err) {
 		console.error(err);
 		process.exit(1);
 	}
 }).on('listening', () => {
 	console.log(process.pid + ' - https listening on port:' + https_port);
+	
 	const io = require('socket.io')(https_server); // only under https_server
 	io.on('connection', (socket) => {
 		console.log('[incoming socket connection]' + socket.id);
@@ -158,7 +166,6 @@ http.createServer(app).listen(http_port).on('error', (err) => {
 	}
 }).on('listening', () => {
 	console.log(process.pid + ' - http listening on port:' + http_port);
-	
 });
 
 

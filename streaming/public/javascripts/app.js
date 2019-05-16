@@ -1,4 +1,5 @@
 // MODIFY THIS TO THE APPROPRIATE URL IF IT IS NOT BEING RUN LOCALLY
+// (c) Nacho 2018
 var socket = io.connect(window.location.href);
 
 var canvas = document.getElementById('canvas-video');

@@ -32,7 +32,7 @@ const detect = function (frame) {
 	const result = classifier.detectMultiScale(frame);
 	//console.log('result.objects.length:',result.objects.length);
 	if(counter>10){
-		console.log('BEEP !!! !!!');
+		console.log('!!! !!! ALERT BEEP !!! !!!');
 		beep(1); // console beep
 	}
 	if (result.objects.length < 2) { // eyes not detected os one of them closed,,,
