@@ -20,7 +20,7 @@ const alpha = 0.5;
 
 // Processes images from ./data/raw/
 // The data should be named as [employeeID]_[uniqueid].png
-// Finds player faces from the images and saves the processed images to ./data/processed/[player]/[uniqueid].png
+// Finds player faces from the images and saves the processed images to ./data/processed/[employeeID]/[uniqueid].png
 const processImages = (callback) => {
 	const dataFolder = global.directory + 'raw';
 	fs.readdir(dataFolder, (err, files) => {
@@ -52,14 +52,26 @@ const processImages = (callback) => {
 				const image = fr.loadImage(dataFolder + '/' + file);
 				const detector = fr.FaceDetector()
 				const targetSize = 150;
-				const faceImages = detector.detectFaces(image, targetSize)
+				const faceImages = detector.detectFaces(image, targetSize);
+				console.log('faceImages', faceImages);
 				const savePath = global.directory + `processed/${player}/${id}.png`;
-				console.log(`FaceImages: ${faceImages}, saving to ${savePath}`);
-				
-				if (!fs.existsSync(global.directory + `processed/${player}`)) {
-					fs.mkdirSync(global.directory + `processed/${player}`);
+				if (faceImages.length == 0) {
+					console.log('can not detect face in this image(will be deleted):',dataFolder + '/' + file);
+					try {
+						fs.unlinkSync(dataFolder + '/' + file);
+					} catch (err) {
+						console.log('error delete file', err);
+					}
+				} else {
+					//const savePath = global.directory + `processed/${player}/${id}.png`;
+					console.log(`FaceImages: ${faceImages}, saving to ${savePath}`);
+					
+					if (!fs.existsSync(global.directory + `processed/${player}`)) {
+						fs.mkdirSync(global.directory + `processed/${player}`);
+					}
+					faceImages.forEach((img, i) => fr.saveImage(savePath, img))
 				}
-				faceImages.forEach((img, i) => fr.saveImage(savePath, img))
+				
 			}
 		});
 		callback(true);
@@ -76,22 +88,28 @@ const trainModel = (callback) => {
 	
 	const faces = {};
 	let players = dirs(dataPath);
+	let imageTrained = [];
 	players.forEach(player => {
 		const files = fs.readdirSync(`${dataPath}/${player}`);
 		console.log(dataPath);
 		console.log(player);
-		files.map(file => console.log(file))
+		files.map(file => {
+			console.log(file);
+			imageTrained.push(player+'_'+file)
+		});
 		faces[player] = files.map(file => fr.loadImage(`${dataPath}/${player}/${file}`));
 	});
 	
 	// Create & Train the model
-	const recognizer = fr.FaceRecognizer()
+	const recognizer = fr.FaceRecognizer();
 	
 	Object.keys(faces).forEach(function (player, index) {
-		const numJitter = 10;
+		const numJitter = 15;
 		console.log(`For player ${player}, got ${faces[player].length} faces`);
 		recognizer.addFaces(faces[player], player, numJitter);
 	});
+	fs.writeFileSync(global.directory + '/model/players.json', JSON.stringify(imageTrained));
+	
 	
 	fs.writeFile(global.directory + global.modelFile, JSON.stringify(recognizer.serialize()), err => {
 		if (err) {
@@ -102,6 +120,8 @@ const trainModel = (callback) => {
 		global.recognizer = recognizer;
 		callback(true);
 	});
+	
+	
 };
 
 
@@ -154,7 +174,8 @@ const prediceBest = (bitmap) => {
 				let prediceBest = global.recognizer.predictBest(face);
 				if (prediceBest != undefined) {
 					console.log('-->', new Date());
-					if (prediceBest.distance > 0.50) {
+					console.log(prediceBest.className,prediceBest.distance);
+					if (prediceBest.distance > 0.60) {
 						prediceBestArray.push({"className": 'Unknown', distance: prediceBest.distance});
 						imageCvMat = draw(cv, imageCvMat, faceRects[i], 'Unknown', prediceBest.distance);
 					} else {
