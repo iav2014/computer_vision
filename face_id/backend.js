@@ -43,15 +43,16 @@ const fs = require('fs');
 const bodyParser = require("body-parser");
 const video = require('../streaming/video');
 const index = require('../streaming/routes/index');
+const config = require('./config/config');
 
 let FaceRecognitor = require('./FaceRecognition/FaceRecognitor');
-const https_port = 3000;
-const http_port = 8080;
+const https_port = config.app.https_port;
+const http_port = config.app.http_port;
 
 const app = express();
 // cert to access webcam from outsider,,,
 let key = fs.readFileSync(__dirname + '/cert/server.key'); // your server.key && pem files
-let cert = fs.readFileSync(__dirname + '/cert/server.pem')
+let cert = fs.readFileSync(__dirname + '/cert/server.pem');
 let https_options = {
 	key: key,
 	cert: cert
@@ -67,7 +68,7 @@ let RemoveLastDirectoryPartOf = (the_url) => {
 };
 global.basename = RemoveLastDirectoryPartOf(__dirname);
 global.directory = __dirname + '/data/';
-global.modelFile = 'model/resnet_model.json';
+global.modelFile = config.model.modelFile;
 global.recognizer = fr.FaceRecognizer();
 
 app.use(cors());
@@ -79,7 +80,6 @@ app.use(express.static('public'));
 try {
 	console.log('-> loading model:', new Date());
 	global.model = JSON.parse(fs.readFileSync(global.directory + global.modelFile));
-	
 	global.recognizer.load(global.model);
 	console.log('--> end loader:', new Date());
 } catch (error) {
@@ -88,7 +88,17 @@ try {
 
 // POST training data
 app.post('/image', function (req, res) {
-	console.log('POST with image')
+	console.log('POST with image');
+	if (!req.body.image) {
+		console.log('[ERROR] no image field! - 404');
+		res.sendStatus(400);
+		return;
+	}
+	if (!req.body.name) {
+		console.log('[ERROR] no name field! - 404');
+		res.sendStatus(400);
+		return;
+	}
 	let image = req.body.image.split(',')[1];
 	let name = global.directory + '/raw/' + req.body.name + '_' +
 		Math.floor(new Date() / 1000) + '.png';
@@ -116,7 +126,12 @@ app.get('/train', function (req, res) {
 
 // Use FaceRecognitor to ask whose fase the image is of
 app.post('/prediceBest', function (req, res) {
-	console.log('[prediceBest post was called]')
+	console.log('[prediceBest] - service called')
+	if (!req.body.image) {
+		console.log('[ERROR] no image field! - 404');
+		res.sendStatus(400);
+		return;
+	}
 	let image = req.body.image.split(',')[1];
 	let bot = req.body.bot;
 	let bitmap = new Buffer.from(image, 'base64');
@@ -129,11 +144,10 @@ app.post('/prediceBest', function (req, res) {
 		const imgBase64 = encodeJpgBase64(img);
 		console.log('prediceBest:', players);
 		if (bot) {
-			res.json({status:true,img:img,players});
+			res.json({status: true, img: img, players});
 		} else {
 			res.json({status: true, imgBase64: imgBase64, players: players});
 		}
-		
 	}
 });
 
@@ -147,7 +161,6 @@ let https_server = https.createServer(https_options, app).listen(https_port).on(
 	}
 }).on('listening', () => {
 	console.log(process.pid + ' - https listening on port:' + https_port);
-	
 	const io = require('socket.io')(https_server); // only under https_server
 	io.on('connection', (socket) => {
 		console.log('[incoming socket connection]' + socket.id);
@@ -155,7 +168,7 @@ let https_server = https.createServer(https_options, app).listen(https_port).on(
 			console.log('[socket disconnected]');
 		});
 	});
-	video.start((err, imgB64) => {
+	video.start((err, imgB64) => { // start server socket.io
 		io.emit('frame', {buffer: imgB64}); // broadcast to all incoming sockets
 	});
 });

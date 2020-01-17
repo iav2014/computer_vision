@@ -1,25 +1,44 @@
 /**
  * Created by ariza on 11/2018.
- * personOfInterest2.js using DLIB model
+ * personOfInterest3.js using DLIB model
  * opencv based face recognition
  * @goal: recognize persons in real time video
  * @use: RealTime monitoring - Access Control - Single factor Authentication
+ * @demo: use for demo only - identification profiles not in database
  * @author: Nacho Ariza 2018
  */
-//const fr = require('face-recognition');
 
+const argv = require('minimist')(process.argv.slice(2));
+console.dir(argv);
+const sintax = () => {
+	return 'Sintax: node personOfInterest3.js -v video.mov'
+}
+if (!argv.v) {
+	console.log(sintax());
+	process.exit(1);
+} else {
+	if (argv.v===true) {
+		console.log('Param error: [no video file]');
+		console.log(sintax());
+		process.exit(1);
+	}
+	
+}
+const config=require('./config/config');
 const cv = require('opencv4nodejs');
 
 let fr = require('face-recognition').withCv(cv);
 let recognizer = fr.FaceRecognizer();
 let model = null;
 const fs = require('fs');
-const minDetections = 10;
-const skmoTeam = ['155638', '157877', '165828'];
+const minDetections = 7;
+// database simulation with employeeID + names
+const skmoTeam = ['angel', 'eladio'];
+const teamNames = ['Angel Quesada','Eladio Martinez'];
+// end of database simulation
 try {
 	console.log('-> loading model:', new Date());
-	console.log(__dirname)
-	model = JSON.parse(fs.readFileSync(__dirname + '/data/model/' + 'resnet_model.json'));
+	model = JSON.parse(fs.readFileSync(config.data.modelFile));
 	
 	recognizer.load(model);
 	console.log('--> end loader:', new Date());
@@ -38,7 +57,7 @@ const white = new cv.Vec(255, 255, 255);
 const face_region_color = blue;
 const text_color = green;
 
-function draw(frame, faceRect, text, face_region_color, team) {
+function draw(frame, faceRect, employee,name, face_region_color, team) {
 	const alpha = 0.4;
 	const rect = cv.drawDetection(
 		frame,
@@ -47,14 +66,14 @@ function draw(frame, faceRect, text, face_region_color, team) {
 	);
 	let textArray = [];
 	if (team) {
-		textArray = [{text: 'Expert team', fontSize: 0.5, thickness: 1, color: green},
-			{text: '[' + text + ']', fontSize: 0.4, thickness: 1, color: face_region_color}];
+		textArray = [{text: name, fontSize: 0.5, thickness: 1, color: green},
+			{text: '[' + employee + ']', fontSize: 0.4, thickness: 1, color: face_region_color}];
 	} else {
-		textArray = [{text: '[' + text + ']', fontSize: 0.4, thickness: 1, color: yellow}];
+		textArray = [{text: '[' + employee + ']', fontSize: 0.4, thickness: 1, color: yellow}];
 	}
 	cv.drawTextBox(
 		frame,
-		new cv.Point(rect.x, rect.y + rect.height + 10),
+		new cv.Point(rect.x-20, rect.y + rect.height + 5),
 		textArray,
 		alpha
 	);
@@ -64,7 +83,8 @@ function draw(frame, faceRect, text, face_region_color, team) {
 const devicePort = 0;
 //const vCap = new cv.VideoCapture(devicePort);
 console.log(__dirname);
-const vCap = new cv.VideoCapture(__dirname+'/video/'+'skype_33.mov');
+//const vCap = new cv.VideoCapture(__dirname+'/video/'+'skype_33.mov');
+const vCap = new cv.VideoCapture(argv.v);
 
 const delay = 1;
 let done = false;
@@ -100,7 +120,14 @@ function drawRectWithText(image, rect, text, color) {
 		thickness
 	)
 }
-
+let find_person=(employee)=>{
+	for(let i=0;i<skmoTeam.length;i++){
+		if(skmoTeam[i]===employee){
+			return {team:true,employee:employee,name:teamNames[i]};
+		}
+	}
+	return -1;
+}
 const unknownThreshold = 0.6;
 let live = (frame) => {
 	const faces = detectFaces(frame, 150);
@@ -111,11 +138,21 @@ let live = (frame) => {
 		const prediction = recognizer.predictBest(cvFace, unknownThreshold);
 		const text = `${prediction.className} (${prediction.distance})`;
 		//drawRectWithText(frame, rect, text, white)
+		
+		let team=find_person(prediction.className);
+		if(team==-1){
+			draw(frame, rect, text,'no name', white, false);
+		} else {
+			draw(frame, rect, text,team.name, white, team.team);
+		}
+		/*
 		if (skmoTeam.includes(prediction.className)) {
 			draw(frame, rect, text, white, true);
 		} else {
 			draw(frame, rect, text, white, false);
 		}
+		*/
+	
 		console.log(prediction);
 	});
 	return frame;
@@ -148,7 +185,7 @@ let recursive = (value) => {
 		console.log('empty');
 	} else {
 		//console.log(frame);frame=frame.resize(480/2,800/2);
-		cv.imshow('frame', live(frame.resize(480/2,800/2)));
+		cv.imshow('MIT Machine Learning - webinar 2', live(frame.resize(680/2,950/2)));
 		const key = cv.waitKey(delay);
 	}
 	

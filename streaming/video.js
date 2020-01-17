@@ -10,6 +10,7 @@ let fr = require('face-recognition').withCv(cv);
 //let recognizer = fr.FaceRecognizer();
 let recognizer = null;
 let model = null;
+const TIMEOUT=5000;
 const fs = require('fs');
 const minDetections = 10;
 const skmoTeam = ['155638', '157877', '165828'];
@@ -94,7 +95,8 @@ let drawRectWithText = (image, rect, text, color) => {
 		color,
 		thickness
 	)
-}
+};
+let alien = [];
 
 const unknownThreshold = 0.6;
 let live = (frame) => {
@@ -107,6 +109,7 @@ let live = (frame) => {
 		const text = `${prediction.className} (${prediction.distance})`;
 		//drawRectWithText(frame, rect, text, white)
 		if (skmoTeam.includes(prediction.className)) {
+			alien.push(prediction.className); // alert mode on!
 			draw(frame, rect, text, white, true);
 		} else {
 			draw(frame, rect, text, white, false);
@@ -126,9 +129,7 @@ let start = (callback) => {
 		recognizer = fr.FaceRecognizer();
 		try {
 			console.log('-> loading model:', new Date());
-			console.log(__dirname)
-			model = JSON.parse(fs.readFileSync(RemoveLastDirectoryPartOf(__dirname)+'/face_id/data/model/resnet_model.json'));
-			
+			model = JSON.parse(fs.readFileSync(RemoveLastDirectoryPartOf(__dirname) + '/face_id/data/model/resnet_model.json'));
 			recognizer.load(model);
 			console.log('--> end loader:', new Date());
 		} catch (error) {
@@ -140,24 +141,26 @@ let start = (callback) => {
 		recognizer = global.recognizer;
 	}
 	
-	setInterval(function () {
+	setInterval(() => {
 		let frame = vCap.read();
 		// loop back to start on end of stream reached
 		if (frame.empty) {
-			vCap.reset();
+			//vCap.reset();
 			frame = vCap.read();
 			console.log('empty');
 		} else {
-			;
 			let imgB64 = cv.imencode('.jpg', live(frame.resize(480 / 2, 800 / 2))).toString('base64');
 			callback(null, imgB64);
-			
 			const key = cv.waitKey(delay);
 		}
-		
 	}, camInterval);
 };
-
+// uniq = [...new Set(array)];
+setInterval(() => {
+	console.log(...new Set(alien));
+	
+	
+}, TIMEOUT);
 module.exports = {
 	start
-}
+};
