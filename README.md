@@ -76,6 +76,25 @@ index.html is a basic html than allows
 
 The model trained is valid for video recog too.
 
+[blurStreaming.js]
+
+This code use a face classifier to detect face and blur face and
+send image using socket.io to html canvas in real time.
+
+
+[personOfInterestStreaming.js]
+
+This code using RNN to recognice training face id, and send the result using socket.io to
+html canvas in realtime.
+
+[lbpm,eugen,ficher]
+Different methods to train & recognice faceID.
+
+[objectTracking]
+
+Different examples to detect ball, guns, gesture control,advertising recognition in video and cam.
+
+
 Thanks to Alex Gasco Perez for his contribution
 
 (c) Nacho Ariza - 12/2018
